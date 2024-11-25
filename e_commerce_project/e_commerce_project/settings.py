@@ -16,7 +16,7 @@ from datetime import timedelta
 from decouple import config
 
 
-# AUTH_USER_MODEL = 'api.User'
+AUTH_USER_MODEL = 'api.UserModel'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -200,7 +200,7 @@ LOGGING = {
             "encoding": "utf-8",
         },
         "demo": {
-            "level": "INFO",
+            "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(BASE_DIR, "log/demo.log"),
             "maxBytes": 1024 * 1024 * 50,
@@ -209,7 +209,7 @@ LOGGING = {
             "encoding": "utf-8",
         },
         "error": {
-            "level": "INFO",
+            "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(BASE_DIR, "log/error.log"),
             "maxBytes": 1024 * 1024 * 50,
@@ -226,12 +226,13 @@ LOGGING = {
         },
         "demo_log": {
             "handlers": ["demo"],
-            "propagate": True,
+            "propagate": False,
+            "level": "DEBUG",
         },
         "error_log": {
             "handlers": ["error"],
-            "propagate": True,
+            "propagate": False,
+            "level": "ERROR",
         },
-       
     },
 }
