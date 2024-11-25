@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+from decouple import config
+
+
+# AUTH_USER_MODEL = 'api.User'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,7 +39,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "api",
     "rest_framework",
-    "rest_framework_simplejwt"
+    "rest_framework_simplejwt",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -80,14 +84,32 @@ WSGI_APPLICATION = 'e_commerce_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', cast=int)
     }
 }
 
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -146,10 +168,10 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": '%{levelname} %{asctime} %{module} %{FuncName} %{lineno} %{process:d} %{thread:d} %{message}',
+            "format": '%(levelname)s %(asctime)s %(module)s %(funcName)s %(lineno)d %(process)d %(thread)d %(message)s',
         },
         "simple": {
-            "format": "%{levelname} %{asctime} %{module} %{FuncName} %{lineno} %{process:d} %{thread:d} %{message}",
+            "format": '%(levelname)s %(asctime)s %(module)s %(funcName)s %(lineno)d %(process)d %(thread)d %(message)s',
         },
     },
     "filters": {
@@ -163,59 +185,53 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": 'DEBUG' if DEBUG else "INFO",
+            "level": "DEBUG",
             "filters": ["require_debug_true"],
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        'info': { # error in this log file 
-            'level': 'INFO',
-            'class': 'logging. handlers.RotatingFileHandler',
-            'filename': os.path. join(BASE_DIR, "log/info.log"),
-            'maxBytes': 300 * 1024 * 1024,
-            'backupCount': 10,
-            'formatter': 'verbose',
-            'encoding': 'utf-8'
+        "info": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "log/info.log"),
+            "maxBytes": 300 * 1024 * 1024,
+            "backupCount": 10,
+            "formatter": "verbose",
+            "encoding": "utf-8",
         },
-        'demo':{ # output of the api comes in this log file 
-            'level': ' INFO',
-            'class': 'logging handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, "log/demo.log"),
-            'maxBytes': 1024 * 1024 * 50,
-            'backupCount': 5,
-            'formatter': 'verbose',
-            'encoding': "utf-8"
+        "demo": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "log/demo.log"),
+            "maxBytes": 1024 * 1024 * 50,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
         },
-        
+        "error": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "log/error.log"),
+            "maxBytes": 1024 * 1024 * 50,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
     },
     "loggers": {
-        # "django": {
-        #     "handlers": ["console"],
-        #     "propagate": True,
-        # },
-        # "django.request": {
-        #     "handlers": ["mail_admins"],
-        #     "level": "ERROR",
-        #     "propagate": False,
-        # },
-        # "myproject.custom": {
-        #     "handlers": ["console", "mail_admins"],
-        #     "level": "INFO",
-        #     "filters": ["special"],
-        # },
-        "django": { # The default logger application is configured as follows
+        "django": {
             "handlers": ["info", "console"],
             "propagate": True,
-            "level": "INFO"
+            "level": "INFO",
         },
-        'demo_log': { # The logger named'demo'is also handled separately
-        'handlers': ['demo'],
-        "propagate": True,
+        "demo_log": {
+            "handlers": ["demo"],
+            "propagate": True,
         },
-        # ‘level’: 'INFO',
-        # | ‘city log': { # The logger named'City'is also handled separately
-        # | ‘handlers’: ['city'l],
-        # | “propagate”: True,
-        # | ‘level’: "INFO',
+        "error_log": {
+            "handlers": ["error"],
+            "propagate": True,
+        },
+       
     },
 }
