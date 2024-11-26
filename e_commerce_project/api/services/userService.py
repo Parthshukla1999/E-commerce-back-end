@@ -37,7 +37,6 @@ class UserService():
         
 
     def login(self, request):
-        print(request.data)
         logger_demo.debug(f"request:{request.data}")
         try:
             user = UserModel.objects.get(username = request.data["username"])
@@ -72,6 +71,55 @@ class UserService():
             # Log the error using the 'error_log' logger
             logger_error.error(error_message)
             return {"data":None,"message":"user with this email or username does not exist","status":400}
+        
+    def logout(self, request):
+        return {"data":None,"message":"logout successfully","status":200}
+    
+    def update_user_details(self, request):
+        try:
+            user = UserModel.objects.get(id = request.user.id)
+            serializer = UserSerializer(user,data= request.data, partial = True)
+            if serializer.is_valid():
+                serializer.save()
+                return {"data":None,"message":"user detials update","status":200}
+            
+        except Exception as e:
+
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            error_message = f"Exception Type: {exc_type}, File Name: {fname}, Line Number: {exc_tb.tb_lineno}, Error: {str(e)}"
+            
+            # Log the error using the 'error_log' logger
+            logger_error.error(error_message)
+            return {"data":None,"message":"updation fail","status":400}
+        
+    def user_detials(self, request):
+        try:
+            user = UserModel.objects.get(id = request.user.id)
+            serializer = UserSerializer(user)
+            return {"data":None,"messages":"Fetched","status":200}
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            error_message = f"Exception Type: {exc_type}, File Name: {fname}, Line Number: {exc_tb.tb_lineno}, Error: {str(e)}"
+            
+            # Log the error using the 'error_log' logger
+            logger_error.error(error_message)
+            return {"data":None,"message":"something went wrong","status":400}
+    
+    def user_account_deactivate(self, request):
+        try:
+            user= UserModel.objects.get(id = request.user.id)
+            user.is_active = False
+            user.save()
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            error_message = f"Exception Type: {exc_type}, File Name: {fname}, Line Number: {exc_tb.tb_lineno}, Error: {str(e)}"
+            
+            # Log the error using the 'error_log' logger
+            logger_error.error(error_message)
+            return {"data":None,"message":"something went wrong","status":400}
 
 
 
